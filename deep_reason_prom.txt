@@ -1,0 +1,116 @@
+Context:
+I will paste a block of code below between the markers (---CODE START--- and ---CODE END---).
+
+Language: [LANGUAGE e.g. Python/Java/JS/C++]
+
+My goal: [e.g. understand for interview / refactor / fix a bug / write tests]
+
+My familiarity: [none / basic / advanced] – Adjust explanations accordingly.
+
+Your task: Deeply analyze and explain the code using the following steps. Tailor your explanation to the user's familiarity level: use simpler language and more background if none/basic, and more technical depth if advanced.
+
+1) TL;DR + 3-point summary
+
+Write 1 sentence TL;DR about the code’s overall purpose.
+
+Then give 3 bullet points summarizing the code at a high level, including: purpose, main inputs, outputs, and any side-effects.
+
+If the code involves a machine learning model, identify the model type and its main role (e.g., “a convolutional neural network used for image classification”).
+
+2) Quick map
+
+List the files, major functions, classes, or modules in the code.
+
+For each, give a one-line description of its purpose or role in the program (e.g., “preprocess_data(): cleans and normalizes input before training the model”).
+
+3) Execution flow (call-graph & dataflow)
+
+Provide a step-by-step trace of how the code runs from start to finish.
+
+Include a small ASCII flowchart or numbered flow of the main calls and data flow.
+
+Highlight where the program begins (e.g., main() or script entry) and how data moves through functions.
+
+4) Line/Block annotated explanation
+
+Explain each function and important code block line-by-line (or function-by-function for very long code).
+
+For each variable, indicate its type and initial value/source.
+
+Describe what each line does in context.
+
+Adapt detail to familiarity: add extra background or analogies for beginners, and use precise technical terms for advanced readers.
+
+5) Example run(s) (interactive)
+
+Provide 2–3 small sample inputs and their exact outputs.
+
+For the first example, include a table showing key variable values at important checkpoints in the code (for clarity).
+
+Interactive tip: Present at least one example as a runnable snippet. Explain how a reader could copy the code into a REPL/notebook and experiment with it (e.g., by changing a parameter and observing the effect).
+
+6) Reproduce & debug plan
+
+List commands to run the code, including any setup (environment variables, dependencies, etc.).
+
+Suggest specific breakpoints or logging statements to add at runtime to inspect behavior or catch errors.
+
+7) Web/Docs research (deep checks)
+
+For every external library, API call, or non-obvious algorithm used, search for authoritative documentation or references.
+
+Summarize relevant info, best practices, or common pitfalls (with citations).
+
+If the code uses machine learning libraries or models, include references to official docs or key research papers about those models.
+
+8) Correctness risks & edge cases
+
+List potential bugs, race conditions, precision issues, resource leaks, or security vulnerabilities.
+
+For each, explain how you might trigger or detect it.
+
+9) Tests to prove understanding
+
+Provide unit tests (e.g., pytest, unittest, jest, etc.) covering normal cases, boundary cases, and at least one expected failure.
+
+Note any mocking or stubbing needed (e.g., for network calls or hardware).
+
+10) Performance & complexity
+
+Analyze time and space complexity of critical functions (big-O notation).
+
+Identify performance hotspots and suggest concrete optimizations (with code snippets if helpful).
+
+11) Refactor suggestions (prioritized)
+
+Suggest 3–5 specific refactors to improve readability, safety, or performance.
+
+Show before/after code snippets for each suggestion.
+
+12) Security & deps audit
+
+Highlight input validation issues, injection risks, unsafe deserialization, secrets in code, etc.
+
+Flag any outdated or vulnerable dependencies (with known advisories).
+
+13) Technology alternatives & comparisons
+
+For each major technology or pattern used (framework, library, etc.), suggest at least one modern alternative.
+
+Compare original vs. alternative in a table: performance, security, ecosystem, and learning curve.
+
+Explain limitations of the alternative and reasons you might not switch.
+
+14) Assumptions & unknowns
+
+List assumptions you made (e.g., about code context or unspecified inputs).
+
+If critical info is missing, ask one precise clarifying question.
+
+15) Final checklist & next steps
+
+Give 3 actionable next steps (e.g., add tests, run with specific inputs, PR tasks).
+
+Output Format: Use clear headings, numbered lists, and code blocks. Keep paragraphs short.
+
+Citations: When referencing sources (e.g., docs or papers), cite them next to the relevant claim (e.g., 【source†Lx-Ly】).
