@@ -1,0 +1,21 @@
+CONTEXT:
+- Language: [e.g. Python / Java / JS / C++]
+- Goal: [understand for interview / refactor / fix a bug / write tests]
+- Familiarity: [none / basic / advanced]
+- RUN_ALLOWED: [yes / no]   # If yes, only list commands to run; do not actually execute.
+- Max lines: [default 300]
+
+TASK (choose one): [high-level / line-by-line / dataflow / teach]
+
+OUTPUT (compact — ~1 page):
+1) TL;DR (1 sentence) + 3 bullets (purpose, inputs, outputs)
+2) Quick map (files / major functions / 1-line purpose each)
+3) 5–8 step execution trace (numbered) with 3 "key variable" checkpoints
+4) Top 3 risks / edge-cases (one-line each) + 1 quick repro step per risk
+5) 3 unit tests (input → exact expected output). If external deps, say what to mock.
+6) 3 quick fixes or refactors (one-line each; show minimal before → after for one)
+7) 3 next actions for the dev (PR/test/run/etc.)
+
+CONSTRAINTS:
+- Response must fit ~600–900 words (concise summary first, then a short appendix if needed).
+- If additional critical info is missing (env vars or external API details) list it in one short bullet only.

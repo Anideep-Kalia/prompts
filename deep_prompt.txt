@@ -1,0 +1,80 @@
+CONTEXT:
+I will paste a block of code below between the markers (---CODE START--- and ---CODE END---).
+Language: [LANGUAGE e.g. Python/Java/JS/C++]
+My goal: [e.g. understand for interview / refactor / fix a bug / write tests]
+My familiarity: [none / basic / advanced]
+You may (choose) : [RUN_ALLOWED: yes/no]  ← if you can run/debug the code, say so.
+
+SCOPE:
+- Max code size: 300 lines (if larger, ask me to split into files).
+- Depth: choose one of ["quick","comprehensive","audit"].  
+  - "quick" = high-level only (skip detailed breakdown).  
+  - "comprehensive" = full breakdown (default).  
+  - "audit" = full breakdown + security/performance deep dive.  
+- Citation limit: include sources for up to 5 load-bearing claims (prefer official docs / arXiv / vendor blogs).
+
+TASK — Deep Research & Explain (do all of the following, in order):
+
+1) TL;DR (1 sentence) + 3-bullet high-level summary:
+   - Purpose, inputs, outputs, side-effects.
+
+2) Quick map:
+   - List files / major functions / classes in the pasted code and one-line purpose for each.
+
+3) Execution flow (call-graph & dataflow):
+   - Step-by-step trace of how the code runs from start to finish.
+   - If possible, include a small ASCII call-graph or numbered flow.
+
+4) Line/Block annotated explanation:
+   - Explain each function and important code block line-by-line (or function-by-function if huge).
+   - For each variable show type (or inferred type) and where it gets its value.
+
+5) Example run(s):
+   - Provide 2–3 small sample inputs and exact expected outputs.
+   - For the first sample, show a table of key variable values at important checkpoints.
+
+6) Reproduce & debug plan:
+   - List commands to run the code (env vars, deps, run command).
+   - Suggested breakpoints/logs to inspect at runtime to validate behavior.
+
+7) Web/Docs research (deep checks):
+   - For every external library, function, API, or non-obvious algorithm: search the web for authoritative docs, popular StackOverflow answers, known pitfalls, and (if relevant) CVEs or security notes — include 1–3 citations per item.
+   - If a function name or pattern looks ambiguous, show likely interpretations and cite sources.
+
+8) Correctness risks & edge cases:
+   - Enumerate potential bugs, race-conditions, numeric/precision issues, resource leaks, IO problems, and concurrency hazards with steps to reproduce.
+
+9) Tests to prove understanding:
+   - Provide unit tests (pytest / jest / junit as appropriate) covering happy path, boundary cases, and at least one failure case.
+   - Mention mocking/stubbing needed for external services.
+
+10) Performance & complexity:
+    - Big-O time/space for critical functions; identify hotspots and give concrete optimizations (with code diffs where helpful).
+
+11) Refactor suggestions (prioritized):
+    - 3–5 concrete, minimal refactors with before/after code snippets and rationale (readability, safety, performance).
+
+12) Security & deps audit:
+    - Highlight input validation gaps, injection/XSS/CSRF risks, unsafe deserialization, secrets in code, and dependency/version issues — cite advisories if found.
+
+13) Technology alternatives & comparisons:
+    - For each major technology used (framework, library, database, language feature, design pattern):
+      - Suggest at least one modern or more efficient alternative (search the web for 2025 best practices).  
+      - Compare original vs. alternative in a **table**: performance, scalability, security, ecosystem support, learning curve.  
+      - Explain limitations of the alternative and why someone might **not** switch.  
+      - Include citations (respecting the citation limit).
+
+14) Assumptions & unknowns:
+    - Explicitly list any assumptions you made. If critical info is missing, ask exactly one short clarifying question (only if absolutely required).
+
+15) Final checklist & next steps:
+    - 3 actionable next steps for a dev to take (e.g., write N tests, run the code with X inputs, open a small PR with change #1).
+
+OUTPUT FORMAT:
+- Use headings, numbered lists, code blocks, and comparison tables.
+- Put web citations/links next to the claims they support (max 5).
+- Finish with a 2-line TL;DR and the 3 immediate next actions.
+
+---CODE START---
+(paste your code here)
+---CODE END---
