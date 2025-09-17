@@ -70,6 +70,8 @@ TASK — Deep Research & Explain (do all of the following, in order):
 15) Final checklist & next steps:
     - 3 actionable next steps for a dev to take (e.g., write N tests, run the code with X inputs, open a small PR with change #1).
 
+16) Build a dataset for the code given and explain what will happen if i fed this dataset into the code, cover every cases
+
 OUTPUT FORMAT:
 - Use headings, numbered lists, code blocks, and comparison tables.
 - Put web citations/links next to the claims they support (max 5).
