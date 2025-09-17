@@ -28,6 +28,18 @@ TASK — Deep Research & Explain (do all of the following, in order):
 4) Line/Block annotated explanation:
    - Explain each function and important code block line-by-line (or function-by-function if huge).
    - For each variable show type (or inferred type) and where it gets its value.
+   - For every line/construct:
+      - What it does in plain English (beginner-level).
+      - Why it is used (developer-level reasoning).
+      - Alternatives (if relevant).
+      - Edge cases / limitations.
+
+   🔹 *Do not skip simple things.* For example:
+   - Explain `if df['timestamp'].dtype == 'datetime64[ns]': ...` and why forcing date 2023-01-01 matters.
+   - Explain `df.set_index('timestamp', inplace=True)` and why a `DatetimeIndex` is required for resampling.
+   - Explain `zero_var = df.std(axis=0) == 0` and why constant columns are skipped.
+   - Explain what `zip(X, y)` means in the loop and how it pairs arrays.
+   - Explain list comprehensions like `[f'x{i+1}' for i in range(...)]` and why headers are built this way.
 
 5) Example run(s):
    - Provide 2–3 small sample inputs and exact expected outputs.

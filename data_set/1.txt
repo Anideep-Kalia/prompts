@@ -1,0 +1,1041 @@
+input: [CONTEXT:
+I will paste a block of code below between the markers (---CODE START--- and ---CODE END---).
+Language: Python
+My goal: understand the code, what's it's goal and how it is achieving it
+My familiarity: basic
+You may (choose) : [RUN_ALLOWED: yes/no]  ← if you can run/debug the code, say so.
+
+SCOPE:
+- Max code size: 300 lines (if larger, ask me to split into files).
+- Depth: comprehensive
+  - "quick" = high-level only (skip detailed breakdown).  
+  - "comprehensive" = full breakdown (default).  
+  - "audit" = full breakdown + security/performance deep dive.  
+- Citation limit: include sources for up to 5 load-bearing claims (prefer official docs / arXiv / vendor blogs).
+
+TASK — Deep Research & Explain (do all of the following, in order):
+
+1) TL;DR (1 sentence) + 3-bullet high-level summary:
+   - Purpose, inputs, outputs, side-effects.
+
+2) Quick map:
+   - List files / major functions / classes in the pasted code and one-line purpose for each.
+
+3) Execution flow (call-graph & dataflow):
+   - Step-by-step trace of how the code runs from start to finish.
+   - If possible, include a small ASCII call-graph or numbered flow.
+
+4) Line/Block annotated explanation:
+   - Explain each function and important code block line-by-line (or function-by-function if huge).
+   - For each variable show type (or inferred type) and where it gets its value.
+
+5) Example run(s):
+   - Provide 2–3 small sample inputs and exact expected outputs.
+   - For the first sample, show a table of key variable values at important checkpoints.
+
+6) Reproduce & debug plan:
+   - List commands to run the code (env vars, deps, run command).
+   - Suggested breakpoints/logs to inspect at runtime to validate behavior.
+
+7) Web/Docs research (deep checks):
+   - For every external library, function, API, or non-obvious algorithm: search the web for authoritative docs, popular StackOverflow answers, known pitfalls, and (if relevant) CVEs or security notes — include 1–3 citations per item.
+   - If a function name or pattern looks ambiguous, show likely interpretations and cite sources.
+
+8) Correctness risks & edge cases:
+   - Enumerate potential bugs, race-conditions, numeric/precision issues, resource leaks, IO problems, and concurrency hazards with steps to reproduce.
+
+9) Tests to prove understanding:
+   - Provide unit tests (pytest / jest / junit as appropriate) covering happy path, boundary cases, and at least one failure case.
+   - Mention mocking/stubbing needed for external services.
+
+10) Performance & complexity:
+    - Big-O time/space for critical functions; identify hotspots and give concrete optimizations (with code diffs where helpful).
+
+11) Refactor suggestions (prioritized):
+    - 3–5 concrete, minimal refactors with before/after code snippets and rationale (readability, safety, performance).
+
+12) Security & deps audit:
+    - Highlight input validation gaps, injection/XSS/CSRF risks, unsafe deserialization, secrets in code, and dependency/version issues — cite advisories if found.
+
+13) Technology alternatives & comparisons:
+    - For each major technology used (framework, library, database, language feature, design pattern):
+      - Suggest at least one modern or more efficient alternative (search the web for 2025 best practices).  
+      - Compare original vs. alternative in a **table**: performance, scalability, security, ecosystem support, learning curve.  
+      - Explain limitations of the alternative and why someone might **not** switch.  
+      - Include citations (respecting the citation limit).
+
+14) Assumptions & unknowns:
+    - Explicitly list any assumptions you made. If critical info is missing, ask exactly one short clarifying question (only if absolutely required).
+
+15) Final checklist & next steps:
+    - 3 actionable next steps for a dev to take (e.g., write N tests, run the code with X inputs, open a small PR with change #1).
+
+16) Build a dataset for the code given and explain what will happen if i fed this dataset into the code, cover every cases
+
+OUTPUT FORMAT:
+- Use headings, numbered lists, code blocks, and comparison tables.
+- Put web citations/links next to the claims they support (max 5).
+- Finish with a 2-line TL;DR and the 3 immediate next actions.
+
+---CODE START---
+#!/usr/bin/env python3.11
+import os
+import pandas as pd
+import numpy as np
+from sklearn.preprocessing import MinMaxScaler
+import logging
+import sys
+import random
+import time
+# ========== CONFIG ==========
+
+# input_dir = 'sample'  # Input folder path
+# input_dir = 'final_processed_metricdata_dir'  # Input folder path
+# output_dir='swap_sequence_data'
+
+BASE_DIR = ''
+INPUT_DIR_NAME = ''
+OUTPUT_DIR_NAME = ''
+input_dir = f''  # Input folder path
+output_dir = f'' # output folder path
+
+global_min, global_max = 0.0, 100.0
+
+
+os.makedirs(output_dir, exist_ok=True)
+
+TIME_STEPS = 1000
+FUTURE_STEPS = 144
+MAX_ROWS_PER_FILE = 50_000
+RESAMPLE_INTERVAL = '10min'
+
+# Logging setup
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+# ========== Sequence Generator ==========
+def train_generator(df: pd.DataFrame, n_lags: int, n_future: int):
+    X, y = [], []
+    for i in range(len(df) - n_lags - n_future):
+        seq_x = df.iloc[i:i+n_lags].to_numpy(dtype=np.float32)
+        seq_y = df.iloc[i+n_lags:i+n_lags+n_future].to_numpy(dtype=np.float32)
+        X.append(seq_x)
+        y.append(seq_y)
+    return np.array(X), np.array(y)
+
+# ========== Main Processing ==========
+all_X, all_y = [], []
+num_features = None
+
+all_filenames = os.listdir(input_dir)
+random.shuffle(all_filenames)
+
+start_time = time.perf_counter()
+
+for filename in os.listdir(input_dir):
+    if filename.endswith('.csv') and ('MemoryUtilization' in filename) and (filename.startswith('.') == False):
+        path = os.path.join(input_dir, filename)
+        server_id = os.path.splitext(filename)[0]
+
+        try:
+            # Read CSV with time-only format
+            df = pd.read_csv(
+                path,
+                parse_dates=['timestamp'],
+                usecols=['timestamp', 'value'],
+                date_format='%H:%M:%S'  # Match time-only format
+            )
+            logger.info(f"Read {server_id}: {df.shape[0]} rows")
+            logger.info(f"Sample timestamps: {df['timestamp'].head(3).tolist()}")
+
+            # If timestamps are time-only, add a default date to enable resampling
+            if df['timestamp'].dtype == 'datetime64[ns]':
+                # Add a default date (e.g., 2023-01-01) to time-only timestamps
+                df['timestamp'] = df['timestamp'].apply(
+                    lambda x: pd.Timestamp(f"2023-01-01 {x.hour:02d}:{x.minute:02d}:{x.second:02d}")
+                )
+                logger.info("Added default date to time-only timestamps")
+
+            # Explicitly convert timestamp to datetime if needed
+            if not pd.api.types.is_datetime64_any_dtype(df['timestamp']):
+                df['timestamp'] = pd.to_datetime(df['timestamp'], errors='coerce')
+                if df['timestamp'].isna().any():
+                    raise ValueError("Some timestamps could not be parsed")
+                logger.info("Converted timestamps to datetime")
+
+            df.set_index('timestamp', inplace=True)
+            logger.info(f"After set_index: {df.shape[0]} rows, Index type: {type(df.index)}")
+
+            # Verify DatetimeIndex
+            if not isinstance(df.index, pd.DatetimeIndex):
+                raise ValueError(f"Index is not DatetimeIndex, got {type(df.index)}")
+
+            # Resample and interpolate
+            df = df.resample(RESAMPLE_INTERVAL).mean().interpolate(method='linear').dropna()
+            logger.info(f"After resampling ({RESAMPLE_INTERVAL}) and interpolation: {df.shape[0]} rows")
+
+            if df.shape[0] <= (TIME_STEPS + FUTURE_STEPS):
+                logger.warning(f"Skipping {server_id}: insufficient rows ({df.shape[0]}) for TIME_STEPS={TIME_STEPS}, FUTURE_STEPS={FUTURE_STEPS}")
+                continue
+
+            zero_var = df.std(axis=0) == 0
+            if zero_var.any():
+                const_cols = zero_var[zero_var].index.tolist()
+                logger.warning(f"Skipping {server_id}: constant column(s) {const_cols} (std=0)")
+                continue
+
+            # Scale
+            scaled = (df - global_min) / (global_max - global_min)
+            scaled_data = scaled.clip(0.0, 1.0).astype(np.float32)
+            # scaler = MinMaxScaler(feature_range=(0, 1)) #Original
+            scaled = pd.DataFrame(
+                # scaler.fit_transform(df.values), #Original
+                scaled_data,
+                index=df.index,
+                columns=df.columns
+            ).astype(np.float32)
+
+            # Set number of features if not set yet
+            if num_features is None:
+                num_features = scaled.shape[1]
+                logger.info(f"Set num_features to {num_features}")
+
+            # Create sequences
+            X, y = train_generator(scaled, TIME_STEPS, FUTURE_STEPS)
+            logger.info(f"Generated sequences for {server_id} → X shape: {X.shape}, y shape: {y.shape}")
+
+            # Flatten and combine for CSV
+            for xi, yi in zip(X, y):
+                all_X.append(xi.flatten())
+                all_y.append(yi.flatten())
+
+            logger.info(f"Processed {server_id} successfully")
+
+        except Exception as e:
+            logger.error(f"Failed to process {filename}: {e}")
+
+# ========== Save Final CSVs in Chunks with Headers ==========
+if all_X and all_y and num_features is not None:
+    data = np.hstack([np.array(all_X), np.array(all_y)])
+    total_rows = data.shape[0]
+    num_files = (total_rows + MAX_ROWS_PER_FILE - 1) // MAX_ROWS_PER_FILE
+
+    # Create headers
+    x_cols = [f'x{i+1}' for i in range(TIME_STEPS * num_features)]
+    y_cols = [f'y{i+1}' for i in range(FUTURE_STEPS * num_features)]
+    headers = x_cols + y_cols
+
+    for i in range(num_files):
+        start_idx = i * MAX_ROWS_PER_FILE
+        end_idx = min(start_idx + MAX_ROWS_PER_FILE, total_rows)
+        chunk_df = pd.DataFrame(data[start_idx:end_idx], columns=headers)
+        chunk_file = os.path.join(output_dir, f'X_y_sequences_part_{i+1}.csv')
+        chunk_df.to_csv(chunk_file, index=False)
+        logger.info(f"Saved chunk {i+1} → {chunk_file} ({end_idx - start_idx} rows)")
+    
+    logger.info('Completed Saving chunks')
+    
+else:
+    logger.info("⚠️ No valid data found to save.")
+
+end_time = time.perf_counter() # End the timer
+total_time = end_time - start_time
+logger.info(f"Total execution time: {total_time:.2f} seconds.")
+
+
+# line 72 why we forcing date to be 23-01-01 and does it gonna give any problem?? 
+# line 94: df = df.resample(RESAMPLE_INTERVAL).mean().interpolate(method='linear').dropna()  ?? 
+# why forced to float32
+#If first successful file, set num_features = scaled.shape[1].
+
+#             if df['timestamp'].dtype == 'datetime64[ns]':
+                # df['timestamp'] = df['timestamp'].apply(
+                #     lambda x: pd.Timestamp(f"2023-01-01 {x.hour:02d}:{x.minute:02d}:{x.second:02d}")
+                # )
+                # logger.info("Added default date to time-only timestamps")
+
+
+# note date_format is not a standard pandas.read_csv argument — the correct parameter is date_parser or letting parse_dates parse automatically.
+
+---CODE END---
+]
+
+output[
+    Code deep-dive — concise first
+
+TL;DR (1 sentence):
+This script reads time-series CSVs (filtered by filename), resamples/interpolates each series to a fixed interval, scales values to [0,1], builds sliding-window input/output sequences (TIME_STEPS → FUTURE_STEPS), and writes flattened X/y CSV chunks for model training.
+
+3-bullet high-level summary
+
+Purpose: Create supervised sequence dataset (X: past TIME_STEPS, y: next FUTURE_STEPS) from raw CSV metric files (here: MemoryUtilization files).
+
+Inputs / outputs / side-effects: Inputs: CSV files in input_dir each containing timestamp and value. Outputs: one or more CSV(s) in output_dir containing flattened sequences (x1..xN, y1..yM). Side-effects: reads/writes filesystem and can allocate large memory for all sequences in all_X / all_y.
+
+Key constraints: constants TIME_STEPS=1000, FUTURE_STEPS=144, resample '10min', global scaling by global_min=0.0 and global_max=100.0 (hard-coded).
+
+1) Quick map — files, functions, major variables
+
+(Single file) top-level script. Major functions / blocks:
+
+train_generator(df: pd.DataFrame, n_lags: int, n_future: int) — builds sliding-window (X,y) arrays from a (resampled + scaled) DataFrame.
+
+Main processing loop over CSV filenames in input_dir:
+
+reads CSV with pd.read_csv(parse_dates=['timestamp'], ...)
+
+attempts to detect time-only timestamps and forces date 2023-01-01 (user comment / code)
+
+df.set_index('timestamp'), df.resample(RESAMPLE_INTERVAL).mean().interpolate(...).dropna()
+
+scales values to [0,1] via manual (df - global_min) / (global_max - global_min) and casts to float32
+
+call train_generator → append flattened arrays to global all_X, all_y
+
+Final saving block: stacks all_X and all_y horizontally, creates CSV headers for x... and y..., writes chunked CSVs to output_dir.
+
+Key global config variables: TIME_STEPS, FUTURE_STEPS, MAX_ROWS_PER_FILE, RESAMPLE_INTERVAL, global_min, global_max, input/output directory strings.
+
+2) Execution flow — step-by-step & ASCII call-graph
+
+Top-level flow (numbered):
+
+Create output_dir (os.makedirs).
+
+List filenames in input_dir and shuffle.
+
+For each file in input_dir:
+
+if file endswith .csv and contains MemoryUtilization, open it.
+
+pd.read_csv(..., parse_dates=['timestamp'], usecols=['timestamp','value']).
+
+If timestamp dtype is datetime, apply lambda to force date 2023-01-01 for each timestamp (this is probably intended to convert time-only to a full datetime).
+
+Ensure timestamps are datetimes (pd.to_datetime(..., errors='coerce')).
+
+df.set_index('timestamp').
+
+df.resample(RESAMPLE_INTERVAL).mean().interpolate(method='linear').dropna().
+
+If insufficient rows (<= TIME_STEPS + FUTURE_STEPS) → skip.
+
+If any column is constant (std==0) → skip.
+
+Scale by (df - global_min) / (global_max - global_min), clip to [0,1], cast to float32.
+
+If num_features unset, set num_features = scaled.shape[1].
+
+X, y = train_generator(scaled, TIME_STEPS, FUTURE_STEPS).
+
+For each (xi, yi) in zip(X,y): all_X.append(xi.flatten()), all_y.append(yi.flatten()).
+
+After loop: if all_X non-empty:
+
+data = np.hstack([np.array(all_X), np.array(all_y)]).
+
+chunk into files of MAX_ROWS_PER_FILE rows and write to CSVs with headers x1..x_{TIME_STEPS*num_features} + y1..y_{FUTURE_STEPS*num_features}.
+
+Log total execution time.
+
+ASCII call graph:
+
+main
+ ├─ os.listdir(input_dir) -> for filename in files
+ │   └─ process_file(filename)
+ │       ├─ pd.read_csv(...)
+ │       ├─ (maybe) add default date to time-only timestamps
+ │       ├─ pd.to_datetime(...)
+ │       ├─ df.set_index('timestamp')
+ │       ├─ df.resample(RESAMPLE_INTERVAL).mean().interpolate(...).dropna()
+ │       ├─ scale -> scaled (float32)
+ │       ├─ train_generator(scaled, TIME_STEPS, FUTURE_STEPS)
+ │       └─ append flattened sequences to all_X/all_y
+ └─ save chunks from all_X/all_y
+
+3) Line / Block annotated explanation (function-by-function)
+
+I'll walk through the important blocks and explain variables and types.
+
+Note: I will reference line numbers approximately as in the pasted file (top ~ bottom).
+
+Header / imports
+#!/usr/bin/env python3.11
+import os
+import pandas as pd
+import numpy as np
+from sklearn.preprocessing import MinMaxScaler
+import logging
+import sys
+import random
+import time
+
+
+pd = pandas module; np = numpy; MinMaxScaler imported but not used (commented out).
+
+No immediate side effects.
+
+Configuration / globals
+BASE_DIR = ''
+INPUT_DIR_NAME = ''
+OUTPUT_DIR_NAME = ''
+input_dir = f''  # Input folder path
+output_dir = f'' # output folder path
+
+global_min, global_max = 0.0, 100.0
+
+os.makedirs(output_dir, exist_ok=True)
+
+TIME_STEPS = 1000
+FUTURE_STEPS = 144
+MAX_ROWS_PER_FILE = 50_000
+RESAMPLE_INTERVAL = '10min'
+
+
+input_dir / output_dir are empty strings in the snippet — they must be set by the user before running, otherwise os.listdir(input_dir) will fail (FileNotFoundError).
+
+global_min / global_max used to scale values linearly to [0,1] assuming a 0–100 metric (likely % memory utilization).
+
+os.makedirs(output_dir, exist_ok=True) will attempt to create the directory '' which is the current working directory — calling os.makedirs('', exist_ok=True) will raise FileNotFoundError in many environments. So input_dir/output_dir must be set.
+
+Logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+
+Creates module logger.
+
+Sequence generator function
+def train_generator(df: pd.DataFrame, n_lags: int, n_future: int):
+    X, y = [], []
+    for i in range(len(df) - n_lags - n_future):
+        seq_x = df.iloc[i:i+n_lags].to_numpy(dtype=np.float32)
+        seq_y = df.iloc[i+n_lags:i+n_lags+n_future].to_numpy(dtype=np.float32)
+        X.append(seq_x)
+        y.append(seq_y)
+    return np.array(X), np.array(y)
+
+
+Inputs:
+
+df: pandas DataFrame (index = DatetimeIndex), shape (T, features).
+
+n_lags: number of time steps for the input window (TIME_STEPS).
+
+n_future: number of steps to predict (FUTURE_STEPS).
+
+Behavior:
+
+Slide a window; for each position i produce seq_x = rows [i, i+n_lags), seq_y = next n_future rows [i+n_lags, i+n_lags+n_future).
+
+.to_numpy(dtype=np.float32) ensures returned arrays are float32.
+
+Outputs: X shape (N_sequences, n_lags, num_features), y shape (N_sequences, n_future, num_features).
+
+Complexity: O(T * n_lags * features) time and O(N_sequences * n_lags * features) memory.
+
+Main processing loop: file discovery
+all_X, all_y = [], []
+num_features = None
+all_filenames = os.listdir(input_dir)
+random.shuffle(all_filenames)
+start_time = time.perf_counter()
+
+for filename in os.listdir(input_dir):
+    if filename.endswith('.csv') and ('MemoryUtilization' in filename) and (filename.startswith('.') == False):
+        path = os.path.join(input_dir, filename)
+        server_id = os.path.splitext(filename)[0]
+        try:
+            df = pd.read_csv(
+                path,
+                parse_dates=['timestamp'],
+                usecols=['timestamp', 'value'],
+                date_format='%H:%M:%S'  # Match time-only format
+            )
+            ...
+
+
+os.listdir(input_dir) must succeed — input_dir must exist.
+
+Filter: only files containing MemoryUtilization in name and .csv.
+
+pd.read_csv(..., parse_dates=['timestamp'], date_format='%H:%M:%S'):
+
+date_format is not a standard pandas.read_csv parameter in most stable releases — pandas docs use date_parser or date_format (latter added in newer pandas dev docs) — relying on date_format may be version-dependent. See the docs. 
+Pandas
++1
+
+usecols=['timestamp','value'] ensures only those columns are read.
+
+Time-only timestamp handling
+            logger.info(f"Read {server_id}: {df.shape[0]} rows")
+            logger.info(f"Sample timestamps: {df['timestamp'].head(3).tolist()}")
+
+            # If timestamps are time-only, add a default date to enable resampling
+            if df['timestamp'].dtype == 'datetime64[ns]':
+                # Add a default date (e.g., 2023-01-01) to time-only timestamps
+                df['timestamp'] = df['timestamp'].apply(
+                    lambda x: pd.Timestamp(f"2023-01-01 {x.hour:02d}:{x.minute:02d}:{x.second:02d}")
+                )
+                logger.info("Added default date to time-only timestamps")
+
+
+What it does: for each timestamp (already parsed to datetime), it rebuilds the timestamp with the fixed date 2023-01-01 but keeps hour/minute/second from the parsed value.
+
+Why: resampling requires full dates / a DatetimeIndex. If input CSV had time-only strings (like 12:34:56), parse_dates sometimes produces datetimes defaulting to 1900-01-01 or similar — author chooses 2023-01-01.
+
+Problems / caveats: this collapses all records onto the same calendar day → resampling '10min' will only create a single day's timeline; if original data spans multiple days, you lose day boundaries and ordering. You also cannot reconstruct multi-day series with this approach. (See full analysis below.)
+
+Robust conversion + index setting
+            if not pd.api.types.is_datetime64_any_dtype(df['timestamp']):
+                df['timestamp'] = pd.to_datetime(df['timestamp'], errors='coerce')
+                if df['timestamp'].isna().any():
+                    raise ValueError("Some timestamps could not be parsed")
+                logger.info("Converted timestamps to datetime")
+
+            df.set_index('timestamp', inplace=True)
+            logger.info(f"After set_index: {df.shape[0]} rows, Index type: {type(df.index)}")
+
+            if not isinstance(df.index, pd.DatetimeIndex):
+                raise ValueError(f"Index is not DatetimeIndex, got {type(df.index)}")
+
+
+Uses pd.to_datetime(..., errors='coerce') — that will convert unparsable values to NaT. Docs: errors='coerce' yields NaT for non-parseable. 
+Pandas
+
+Resample & interpolate
+            df = df.resample(RESAMPLE_INTERVAL).mean().interpolate(method='linear').dropna()
+            logger.info(f"After resampling ({RESAMPLE_INTERVAL}) and interpolation: {df.shape[0]} rows")
+
+
+Behavior: resample to RESAMPLE_INTERVAL (here '10min'), take mean of values falling into that bin (if downsampling) or reindex to those timestamps (if upsampling), then interpolate linearly to fill NaN values introduced by resampling/reindexing, then .dropna() to remove any remaining NaNs.
+
+Note: resample(...).mean().interpolate() uses pandas resampler logic — see docs. If the data was time-only pinned to a single date, resampling may only produce a short series (e.g. 24h * 6 per hour = 144 entries for 10min).
+
+See pandas resample & interpolate docs. 
+Pandas
++1
+
+Row-count and constant column checks
+            if df.shape[0] <= (TIME_STEPS + FUTURE_STEPS):
+                logger.warning(f"Skipping {server_id}: insufficient rows ({df.shape[0]}) for TIME_STEPS={TIME_STEPS}, FUTURE_STEPS={FUTURE_STEPS}")
+                continue
+
+            zero_var = df.std(axis=0) == 0
+            if zero_var.any():
+                const_cols = zero_var[zero_var].index.tolist()
+                logger.warning(f"Skipping {server_id}: constant column(s) {const_cols} (std=0)")
+                continue
+
+
+Ensures enough rows to create at least one (X,y) pair.
+
+Skips constant columns (std==0) — because scaling/learning from constant features is useless.
+
+Scaling to [0,1] and float32
+            scaled = (df - global_min) / (global_max - global_min)
+            scaled_data = scaled.clip(0.0, 1.0).astype(np.float32)
+            scaled = pd.DataFrame(
+                scaled_data,
+                index=df.index,
+                columns=df.columns
+            ).astype(np.float32)
+
+
+Uses manual Min–Max scaling to [0,1] using global_min/global_max. This assumes metric values are between those fixed bounds.
+
+Clips values to [0,1] then casts to np.float32.
+
+Why float32? Lower memory footprint and often faster numeric ops (esp. on GPUs). Precision is reduced vs float64. See NumPy dtype docs and common performance observations. 
+NumPy
++1
+
+NOTE: MinMaxScaler was imported earlier but not used; commented-out code suggests author originally used MinMaxScaler.fit_transform(df.values).
+
+num_features and sequence generation
+            if num_features is None:
+                num_features = scaled.shape[1]
+                logger.info(f"Set num_features to {num_features}")
+
+            X, y = train_generator(scaled, TIME_STEPS, FUTURE_STEPS)
+            logger.info(f"Generated sequences for {server_id} → X shape: {X.shape}, y shape: {y.shape}")
+
+            for xi, yi in zip(X, y):
+                all_X.append(xi.flatten())
+                all_y.append(yi.flatten())
+
+
+num_features set on first successful file to the number of columns in scaled (likely 1 if only value).
+
+train_generator returns arrays: X shaped (N, TIME_STEPS, num_features) and y shaped (N, FUTURE_STEPS, num_features).
+
+For storage, the code flattens each xi and yi so final rows will be 1D arrays of length TIME_STEPS * num_features and FUTURE_STEPS * num_features respectively.
+
+Final saving
+if all_X and all_y and num_features is not None:
+    data = np.hstack([np.array(all_X), np.array(all_y)])
+    total_rows = data.shape[0]
+    num_files = (total_rows + MAX_ROWS_PER_FILE - 1) // MAX_ROWS_PER_FILE
+
+    x_cols = [f'x{i+1}' for i in range(TIME_STEPS * num_features)]
+    y_cols = [f'y{i+1}' for i in range(FUTURE_STEPS * num_features)]
+    headers = x_cols + y_cols
+
+    for i in range(num_files):
+        start_idx = i * MAX_ROWS_PER_FILE
+        end_idx = min(start_idx + MAX_ROWS_PER_FILE, total_rows)
+        chunk_df = pd.DataFrame(data[start_idx:end_idx], columns=headers)
+        chunk_file = os.path.join(output_dir, f'X_y_sequences_part_{i+1}.csv')
+        chunk_df.to_csv(chunk_file, index=False)
+
+
+Memory: data = np.hstack([np.array(all_X), np.array(all_y)]) creates a single big 2D numpy array in RAM — if dataset is large this will OOM.
+
+Writes chunked CSV files with nice column names x1..xN, y1..yM.
+
+4) Example runs (small synthetic examples)
+
+Because TIME_STEPS=1000 / FUTURE_STEPS=144 are large, for demonstration you should temporarily set TIME_STEPS=4, FUTURE_STEPS=2, RESAMPLE_INTERVAL='1min'. Below examples use that modified config.
+
+Sample CSV content (file server1_MemoryUtilization.csv)
+
+timestamp,value
+00:00:00,10
+00:01:00,12
+00:03:00,14
+00:04:00,16
+00:07:00,18
+
+
+Run (with TIME_STEPS=4, FUTURE_STEPS=2):
+
+Step: read file, parse timestamps (time-only).
+
+If code forced 2023-01-01 date, timestamps become 2023-01-01 00:00:00, 00:01:00, 00:03:00, etc.
+
+Resample '1min' → timestamps at 00:00,00:01,00:02,00:03,00:04,00:05,00:06,00:07 → mean & interpolate fill missing value at 00:02,00:05,00:06.
+
+Resulting df (index/time, value): [10,12,13,14,16,17,17,18] (interpolated approximate).
+
+len(df)=8, TIME_STEPS + FUTURE_STEPS = 6 → len(df) - TIME_STEPS - FUTURE_STEPS = 2 → Two sequences:
+
+i=0: X: rows 0-3, y: rows 4-5
+
+i=1: X: rows 1-4, y: rows 5-6
+
+For num_features=1, flattened shape per xi = 4, per yi = 2.
+
+all_X contains two rows [x1..x4], all_y contains two rows [y1..y2].
+
+Final CSV row example:
+
+x1,x2,x3,x4,y1,y2
+0.10,0.12,0.13,0.14,0.16,0.17
+0.12,0.13,0.14,0.16,0.17,0.17
+
+
+(values scaled using global_min=0 and global_max=100, so e.g. 10 → 0.1)
+
+Table of key variable values at checkpoints (first sample):
+
+checkpoint	variable	value/type
+after read_csv	df.shape	(5,1)
+after forcing date + to_datetime + set_index	df.index	DatetimeIndex of 5 timestamps (2023-01-01 + times)
+after resample+interpolate	df.shape	(8,1)
+check rows	len(df) - TIME_STEPS - FUTURE_STEPS	2 → 2 sequence windows
+after train_generator	X.shape, y.shape	(2,4,1), (2,2,1)
+final flattened arrays	all_X[0].shape	(4,)
+
+Second sample (edge case): if CSV has timestamp as full datetime across many days (e.g. 2023-01-01 00:00 to 2023-01-07), resampling '10min' will produce a long index — many sequences will be generated (and memory might explode).
+
+5) Reproduce & debug plan (how to run locally)
+
+Dependencies (pip):
+
+python3.11 -m pip install pandas numpy scikit-learn
+# recommended pinned versions for stability: pandas>=2.0, numpy>=1.24, scikit-learn>=1.3
+
+
+Run command (example):
+
+Edit script top to set directories or run from shell:
+
+export INPUT_DIR=/path/to/csvs
+export OUTPUT_DIR=/path/to/out
+# or edit variables input_dir, output_dir in the script
+python3 prepare_sequences.py
+
+
+Suggested debug edit: at top of file, set smaller TIME_STEPS, FUTURE_STEPS, RESAMPLE_INTERVAL to test quickly:
+
+TIME_STEPS = 10
+FUTURE_STEPS = 3
+RESAMPLE_INTERVAL = '1min'
+
+
+Recommended breakpoints / logs to inspect (if debugging interactively):
+
+After pd.read_csv(...) — print df.head() and dtypes.
+
+After date-fixing lambda — print sample df['timestamp'].head(5) to confirm the forced date.
+
+After df.set_index('timestamp') — confirm isinstance(df.index, pd.DatetimeIndex).
+
+After resample(...).interpolate(...) — logger.info(df.head(10)) and logger.info(f"resampled len {len(df)}").
+
+Before/after scaling — print df.min(), df.max() to confirm bounds.
+
+After train_generator — log X.shape, y.shape and an example X[0,:5] and y[0,:5].
+
+When saving chunks — confirm headers length matches data.shape[1].
+
+How to run under a debugger (pdb):
+
+import pdb; pdb.set_trace()
+# or run `python -m pdb prepare_sequences.py`
+
+6) Web/docs research — authoritative references (1–3 per item)
+
+I checked official docs for the load-bearing pandas / numpy / sklearn behaviors used:
+
+pandas.read_csv(parse_dates=...) and date_format notes: pandas docs (read_csv) — shows parse_dates usage and date_format examples. 
+Pandas
++1
+
+pandas.to_datetime(errors='coerce') behavior: marks non-parsable values as NaT. 
+Pandas
+
+pandas.DataFrame.resample and Resampler.interpolate: how resampling and interpolate behave (reindex then interpolation). 
+Pandas
++1
+
+numpy dtypes & float32 notes: official NumPy dtype docs (float32 vs float64). Also community observations on performance speedups using float32. 
+NumPy
++1
+
+sklearn.preprocessing.MinMaxScaler docs (transformation formula). Even though script uses manual scaling, MinMaxScaler behavior is relevant. 
+Scikit-learn
+
+(These are the 5 citations used.)
+
+7) Correctness risks & edge cases (detailed)
+
+Below are potential bugs and how to reproduce / mitigate.
+
+input_dir / output_dir empty strings
+
+Symptom: os.listdir('') or os.makedirs('', exist_ok=True) raises FileNotFoundError or behaves unexpectedly.
+
+Reproduce: run script as-is.
+
+Fix: require non-empty paths or use argparse to supply them.
+
+Forcing single date (2023-01-01) for timestamps (line ~72)
+
+Symptom: multi-day series collapse to a single day → resample produces at most one day's worth of timestamps, losing chronology and causing many files to be skipped because df.shape[0] <= TIME_STEPS + FUTURE_STEPS.
+
+Reproduce: feed CSV with timestamps across multiple days but time-only strings; script will convert all to 2023-01-01 and collapse.
+
+Mitigation: detect time-only strings vs full datetimes; if time-only, reconstruct day indices based on file metadata or other column; prefer preserving original dates if present. See docs for parse_dates and date_parser. 
+Pandas
+
+date_format parameter may not be supported in some pandas versions
+
+Symptom: pd.read_csv(..., date_format=...) throws TypeError in pandas versions that don't have date_format support.
+
+Reproduce: use pandas 1.x where date_format not accepted.
+
+Fix: use date_parser or parse using pd.to_datetime(df['timestamp'], format='%H:%M:%S', errors='coerce').
+
+Resample + interpolate edge cases
+
+If the series has large gaps or irregular sampling, linear interpolation may produce unrealistic values. If resampling upscales, you may get many NaNs that interpolate fills—this may not be the desired strategy. (See pandas resample docs.) 
+Pandas
+
+Constant columns skip
+
+If std == 0 on a column, the whole file is skipped. For single-feature value, a constant metric leads to skip — maybe acceptable, but could be noisy. If std computed on float32 becomes extremely small but nonzero, this check may misbehave.
+
+Memory explosion (biggest risk)
+
+all_X / all_y accumulate flattened arrays in Python lists and then np.hstack at the end. For many servers or long series this will OOM.
+
+Reproduce: run with dozens of long CSVs (each producing millions of sequences).
+
+Fix: stream to disk (write sequences as generated or write chunk-by-chunk), or use HDF5/batches rather than keeping everything in memory.
+
+dtype mismatch and precision loss
+
+Casting to np.float32 reduces numeric precision; if metrics need high precision, this could matter. Generally acceptable for % values but be mindful.
+
+Flattening shape assumptions
+
+The headers length calculation uses TIME_STEPS * num_features. If some files have different num_features (e.g., more columns), but num_features set on the first file only, later files with different feature count will break shapes. Script assumes consistent num_features across files.
+
+Time ordering / timezone
+
+If CSV timestamps include timezone or are not strictly increasing, sliding-window assumptions may be invalid. No sort by index is done after resampling (resample implies sorted), but if df had duplicated/index issues, results may be unexpected.
+
+File naming filter
+
+Only files containing 'MemoryUtilization' will be processed. Any other metrics will be silently ignored.
+
+8) Tests to prove understanding (pytest)
+
+Below are unit tests you can run. Put in tests/test_prepare_sequences.py. The tests use a small DataFrame to validate train_generator and resampling behavior.
+
+# tests/test_prepare_sequences.py
+import pandas as pd
+import numpy as np
+import tempfile
+import os
+from prepare_sequences import train_generator  # assume script refactored to expose function(s)
+
+def test_train_generator_basic():
+    # df: 6 rows, 1 feature
+    df = pd.DataFrame({'v': [1,2,3,4,5,6]})
+    X, y = train_generator(df, n_lags=3, n_future=2)
+    assert X.shape == (1,3,1) or X.shape == (len(df)-3-2,3,1)
+    # the actual expected values:
+    assert np.array_equal(X[0].flatten(), np.array([1,2,3], dtype=np.float32))
+    assert np.array_equal(y[0].flatten(), np.array([4,5], dtype=np.float32))
+
+def test_resample_interpolate(tmp_path, monkeypatch):
+    # Create CSV with missing minutes to test resampling/interpolation chain
+    csv = tmp_path/'test.csv'
+    csv.write_text("timestamp,value\n00:00:00,10\n00:02:00,14\n")
+    # simulate reading and resampling — use the same logic as in script
+    df = pd.read_csv(csv, parse_dates=['timestamp'])
+    # mimic the forced-date behavior from script
+    df['timestamp'] = df['timestamp'].apply(lambda x: pd.Timestamp(f"2023-01-01 {x.hour:02d}:{x.minute:02d}:{x.second:02d}"))
+    df.set_index('timestamp', inplace=True)
+    df2 = df.resample('1min').mean().interpolate(method='linear').dropna()
+    # expect 3 rows: 00:00, 00:01, 00:02
+    assert len(df2) == 3
+    assert df2.iloc[1]['value'] == 12.0  # linear interp between 10 and 14
+
+
+Mocks/stubs: if the script reads many files, use temporary directories and small CSVs. To avoid heavy memory use, set TIME_STEPS/FUTURE_STEPS small in tests.
+
+9) Performance & complexity
+
+train_generator complexity:
+
+Suppose T rows, F features, L = TIME_STEPS, H = FUTURE_STEPS. The function loops O(T - L - H) iterations; each iteration slices L x F and H x F → copying data. Time complexity: O( (T-L-H) * (L+H) * F) ≈ O(T * L * F). Space for output: O(N_sequences * (L+H) * F).
+
+Hotspots:
+
+Python-level loop in train_generator with repeated .iloc (slow).
+
+Accumulating flattened arrays in Python lists then one big np.hstack copy at the end (memory + copy overhead).
+
+Per-file resample/interpolate could be costly for very dense time series.
+
+Concrete optimizations
+
+Vectorized sliding windows using numpy.lib.stride_tricks.sliding_window_view (avoids Python loop). Example diff (replace train_generator):
+
+from numpy.lib.stride_tricks import sliding_window_view
+
+def train_generator_fast(df: pd.DataFrame, n_lags: int, n_future: int):
+    arr = df.to_numpy(dtype=np.float32)  # shape (T, F)
+    L = n_lags
+    H = n_future
+    windows = sliding_window_view(arr, window_shape=(L+H, arr.shape[1]))  # careful shape
+    # sliding_window_view usage is a little tricky for 2D; simpler:
+    X_windows = sliding_window_view(arr, window_shape=(L, arr.shape[1])) # yields many dims
+    # recommended approach: construct a 3D array of shape (N, L, F) and (N, H, F) with slices
+    N = arr.shape[0] - L - H + 1
+    X = np.stack([arr[i:i+L] for i in range(N)], axis=0)
+    y = np.stack([arr[i+L:i+L+H] for i in range(N)], axis=0)
+    return X, y
+
+
+Using sliding_window_view properly reduces Python-level loop overhead, but careful indexing required.
+
+Stream write sequences to CSV instead of all_X accumulation. Write rows as you create them with a CSV writer or use pandas DataFrame batches.
+
+Use float32 already used — keep that to reduce memory by ~2x vs float64.
+
+10) Refactor suggestions (prioritized, with snippets)
+
+Refactor 1 — make config/paths explicit via argparse (high priority)
+Why: avoid empty input_dir/output_dir and allow quick testing.
+
+Before (current top-level vars):
+
+input_dir = f''  # Input folder path
+output_dir = f'' # output folder path
+
+
+After:
+
+import argparse
+
+def parse_args():
+    p = argparse.ArgumentParser()
+    p.add_argument('--input-dir', required=True)
+    p.add_argument('--output-dir', required=True)
+    p.add_argument('--time-steps', type=int, default=1000)
+    p.add_argument('--future-steps', type=int, default=144)
+    return p.parse_args()
+
+if __name__ == "__main__":
+    args = parse_args()
+    input_dir = args.input_dir
+    output_dir = args.output_dir
+    TIME_STEPS = args.time_steps
+    FUTURE_STEPS = args.future_steps
+
+
+Refactor 2 — handle time-only vs full timestamps robustly
+Why: avoid forcing single date or collapsing multi-day data.
+
+Before: forced date 2023-01-01 for all datetimes.
+
+After (suggestion):
+
+# Try to parse as full datetime; if fails and strings look like HH:MM:SS, treat as time-only
+if df['timestamp'].dtype == object:
+    parsed = pd.to_datetime(df['timestamp'], errors='coerce')
+    if parsed.isna().all():
+        # possibly time-only strings: add a date sequence (if we know day boundaries) or leave as time and infer days
+        # simplest: parse as time and keep as timedeltas — but resample needs full datetimes, so best to
+        # ask upstream to provide dates, or if there's a separate 'date' column, combine them.
+        raise ValueError("Timestamps appear to be time-only and no date information found. Please provide dates.")
+else:
+    # already datetime, keep original parsed datetime
+    pass
+
+
+Prefer asking upstream to produce full datetimes — robust solution.
+
+Refactor 3 — stream sequences to disk instead of accumulating in memory
+Why: prevent OOM for large datasets.
+
+Before: accumulate all_X, all_y lists and np.hstack.
+
+After: open CSV writer and append each flattened row as generated; write headers first. Or buffer batches of e.g. 5k rows then write.
+
+Refactor 4 — use MinMaxScaler if per-file scaling intended, or preserve manual global scaling if desired
+Why: if per-file scaling needed, MinMaxScaler protects against divide-by-zero and stores parameters.
+
+from sklearn.preprocessing import MinMaxScaler
+scaler = MinMaxScaler(feature_range=(0,1))
+scaled_values = scaler.fit_transform(df.values).astype(np.float32)
+scaled = pd.DataFrame(scaled_values, index=df.index, columns=df.columns)
+
+
+Refactor 5 — replace .iloc heavy loops with sliding_window_view or vectorized stack
+Why: performance.
+
+(See earlier code snippet.)
+
+11) Security & dependencies audit
+
+Input path injection: script uses os.path.join(input_dir, filename) but relies on filenames from os.listdir, safe for local dirs. If input paths come from user untrusted sources, avoid path traversal concerns.
+
+CSV injection risk: writing CSVs with attacker-controlled strings can cause spreadsheet injection if the CSV is opened in Excel (=CMD(...) style). This script writes only numeric arrays, so risk minimal.
+
+No secrets in code: none detected.
+
+Unsafe deserialization: pd.read_csv is safe for CSVs — but if file content is malicious (very large fields), it can trigger resource exhaustion.
+
+Large dependency vulnerabilities: use supported pandas, numpy, scikit-learn versions. Check advisories for critical CVEs in those packages (none specifically flagged here in my small web check). For dependencies, pin versions and run pip-audit or OS vendor advisories.
+
+Race conditions: if multiple processes write to the same output_dir / same filenames simultaneously, collisions possible. Use atomic file writes or a unique temp file then rename.
+
+Memory DoS: attacker-supplied huge CSVs may exhaust RAM — stream processing recommended.
+
+12) Technology alternatives & comparisons (table)
+
+Major tech used: pandas (resampling/interpolation), manual scaling vs sklearn MinMaxScaler, numpy arrays & float32, sliding-window generation with Python loops vs vectorized sliding_window_view.
+
+Technology	Alternative	Performance	Scalability	Security	Ecosystem / learning curve	Notes
+pandas resample().mean().interpolate()	dask.dataframe or xarray for bigger-than-RAM series	pandas is fast for in-memory; dask enables out-of-core scaling	dask scales across cores/clusters	both similar; dask adds complexity for scheduling	pandas easier; dask steeper	Use dask if data > memory.
+manual (df - min)/(max-min)	sklearn.preprocessing.MinMaxScaler	similar CPU; sklearn gives stored params and inverse_transform	sklearn is in-memory	same	sklearn small learning curve	If you need per-file fit/invertible scaling, prefer MinMaxScaler. 
+Scikit-learn
+
+Python-loop .iloc sliding windows	numpy.lib.stride_tricks.sliding_window_view or tf.signal.frame	sliding_window_view avoids Python loop -> much faster	vectorized approach reduces overhead; more memory-friendly if used carefully	same	sliding_window_view requires care with memory views	Use sliding_window_view for large data to gain speed.
+float32 dtype	float64	float32 halves memory and often faster (esp. on GPU)	float32 better for scale	float32 lower precision but acceptable for many ML tasks	float32 standard in ML pipelines	See numpy docs and performance notes. 
+NumPy
++1
+
+Why someone might not switch: e.g., dask adds complexity and can be slower for small in-memory tasks; float64 may be required where high numeric precision matters.
+
+(References: pandas, numpy, sklearn docs cited above.)
+
+13) Assumptions & unknowns
+
+Assumptions I made:
+
+The CSVs have columns named exactly timestamp and value.
+
+The metric value is in [0,100] (hence global_min=0, global_max=100).
+
+Single-feature value is typical (num_features likely 1).
+
+The user intends to create training sequences for an ML model (e.g., LSTM).
+
+input_dir/output_dir will be set by the user before running.
+
+One short clarifying question (only if absolutely required):
+
+Do your input CSVs contain only time-of-day strings (e.g., HH:MM:SS) without dates, or do they contain full datetimes across multiple days?
+
+(If you answer, I can give a precise replacement for the date-handling logic.)
+
+14) Final checklist & next steps (3 actionable items)
+
+Fix runtime config: change top-level variables to use argparse or set input_dir / output_dir to actual paths (and test with small TIME_STEPS/FUTURE_STEPS).
+
+Remove/replace forced single-date behavior: if CSVs are time-only, either combine with a date column or refuse/ask upstream; if CSVs contain full datetimes, stop forcing 2023-01-01.
+
+Avoid memory blowup: replace accumulation of all sequences with streaming-to-disk: write flattened rows in batches (e.g. buffer 5k rows and to_csv(append=True)).
+
+15) Build a dataset for the code given — and what happens for each case
+
+I'll describe a dataset (small) and enumerate outcomes for different cases.
+
+Dataset A — ideal (single-day high-resolution):
+
+Files: serverA_MemoryUtilization.csv, serverB_MemoryUtilization.csv
+
+Each file: timestamp as time-only (HH:MM:SS) for a single day from 00:00:00 to 23:59:00 sampled every 10 min (144 rows), value in [0..100] varied.
+
+What script does: forced date -> series of 144 rows -> after resample('10min') likely still 144 rows -> check TIME_STEPS + FUTURE_STEPS = 1000+144=1144 → insufficient rows and files skipped because df.shape[0] <= 1144. So no sequences saved unless you lower TIME_STEPS or supply multi-day data.
+
+Dataset B — multi-day series (full datetimes):
+
+Files: serverA_MemoryUtilization.csv with timestamp full datetimes across 60 days sampled every 10 min → ~8640 rows.
+
+What script does: pd.read_csv(parse_dates=['timestamp']) keeps dates → resample produces correct series → len(df) > 1144 → sequences generated: N ≈ 8640 - 1000 - 144 ≈ 7496 sequences → each flattened row size 1000 + 144 = 1144 entries (if num_features=1) → all_X will have 7496 rows → np.hstack memory ~ 7496 * 1144 * 4 bytes ≈ 34.3 MB for one array, but since both all_X & all_y arrays then hstack, a few tens of MB plus overhead — actually fine. But if many servers, multiplies.
+
+Dataset C — noisy with long gaps:
+
+Files with timestamps but gaps of hours/days between samples. Resample to 10min will produce many NaNs that are linearly interpolated — this may make synthetic intermediate values that don't reflect system behavior. The script will produce sequences regardless, but model training may be misled by interpolated gaps.
+
+Dataset D — constant value series:
+
+Files with a constant value across time → script detects zero variance and skips file.
+
+Edge summary: For desired sequences to be produced, you need each file to have >= TIME_STEPS + FUTURE_STEPS resampled rows (with the current constants, ≥1144 rows). If your data is per-day only, you must either lower TIME_STEPS, increase data continuity (multi-day), or change date-handling.
+
+16) Closing TL;DR + 3 immediate next actions
+
+TL;DR (2 lines): The script builds sliding-window train/test sequences from CSV metric files but contains risky date handling (forces 2023-01-01) and memory-heavy accumulation of sequences. Fix paths, date handling, and stream output to avoid data loss and OOMs.
+
+3 immediate next actions for you
+
+Set input_dir and output_dir or run with --input-dir/--output-dir and temporarily lower TIME_STEPS/FUTURE_STEPS for quick verification.
+
+Tell me whether your CSVs have full datetimes or time-only strings — I will provide a precise corrected code snippet to handle them safely.
+
+Apply the streaming refactor (I can generate the exact patch) so sequences are written in batches instead of holding all_X/all_y in memory.
+
+If you want, I can (pick one):
+
+produce a minimal patched script that (a) uses argparse, (b) safely handles time-only vs full datetimes, and (c) streams sequences to CSV in batches — ready to paste & run; or
+
+show the exact code diff to change train_generator to a vectorized sliding_window_view version (with tests).
+]
