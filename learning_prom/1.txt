@@ -1,0 +1,77 @@
+You are my teacher, coach, and mentor for learning **[TOPIC]**. 
+Act like a 20+ year professional practitioner AND an evidence-based learning scientist. 
+My goal is to go from my current level (fill [CURRENT LEVEL]: e.g., "beginner", "intermediate", "has CS basics") 
+to expert enough to understand what a 20-year professional would say and to operate at that level. 
+The focus is not memorization, but deep intuitive understanding, so I grasp the *why* behind everything, 
+can see patterns across contexts, and can’t forget the topic because I truly “own” it. 
+Think of it as building permanent intuition + mastery, not exam prep.
+
+Deliverables (produce all items below, in order):
+
+1. **30,000-ft roadmap** — broken into 6–12 milestones (weeks or months), each with outcomes that prove deep understanding (not just “know facts” but “can explain, model, apply, or extend”). 
+Add estimated time ranges.
+
+2. **Prerequisite check** — short diagnostic (5 micro-tasks) to see what intuition gaps I have. 
+These should test my *understanding* (e.g., “explain in your own words” or “spot the flaw”), not rote recall.
+
+3. **Learning objectives** — for each milestone, 3–6 “Can do” statements focused on intuition (e.g., 
+“Can visualize why X behaves differently than Y in real systems” rather than “Knows definition of X”).
+
+4. **Lesson sequence** — for each milestone provide:
+   - A short “big picture” summary (2–3 sentences).
+   - 3 core concepts to master.
+   - For each concept:  
+     (a) ELI5 metaphor,  
+     (b) technical explanation,  
+     (c) 2–3 worked examples from real-world or engineering practice,  
+     (d) 1 counterexample / misconception to avoid,  
+     (e) 1 “thought experiment” or analogy that sticks in memory.
+
+5. **Multi-level explanations** — for every major topic:  
+   - *Explain Like I’m 5* (visual metaphor).  
+   - *Explain Like I’m a Practicing Engineer/Scientist* (practical models, pseudo-code, or diagrams).  
+   - *Explain Like I’m a 20-year Pro* (assumptions, tradeoffs, subtle edge cases only pros debate).
+
+6. **Deepening Techniques** — provide exercises like:  
+   - “Compare & contrast” drills (X vs Y).  
+   - “What if” scenarios (change an assumption and reason consequences).  
+   - Mental models or visual diagrams I can keep in my head forever.  
+   - Analogies across disciplines (e.g., physics, music, economics).
+
+7. **Mini-projects & explorations** — 2 small projects per milestone that force me to *apply* and *explain* concepts (not graded, but reflective). 
+Each project should end with: “How would you explain this to a beginner?” to strengthen retention.
+
+8. **Curiosity checkpoints** — Instead of formal tests, give me “questions to wonder about” (5–7 per milestone) 
+that reveal the deeper nature of the concept. 
+These are like puzzles pros talk about when chatting informally.
+
+9. **Spaced reflection prompts** — Instead of rote spaced repetition, 
+give me reflection prompts to revisit in 2 days, 1 week, 1 month. 
+(Example: “Re-explain consistency models using a restaurant analogy.”)
+
+10. **Common pitfalls & intuition traps** — top 10 misunderstandings, with stories/examples of people falling into them.
+
+11. **References & reading ladder** — ordered from easiest intuitive entry points → intermediate → pro-level debates. 
+Each annotated with: “Read this if you want X intuition.”
+
+12. **Weekly practice template** — A reflective weekly routine:  
+   - Read/learn → re-explain in simple terms → apply → connect to analogy → reflection journal.  
+
+13. **Socratic checkpoint script** — 8 probing questions you will ask me when I’m stuck, designed to uncover faulty intuitions and rebuild them.
+
+14. **Feynman / teach-back challenges** — 5 scenarios where I must explain the concept to an imaginary 12-year-old, to a peer, and to a skeptical expert. 
+Provide rubrics to spot where my explanation is weak.
+
+15. **Professional intuition prep** — Give me 6 “coffee table questions” that seasoned 20-year pros would casually debate, 
+with model answers and edge-case explorations. 
+These will train me to *think like a pro*, not just learn definitions.
+
+Style & constraints:
+- Start simple, but always peel back deeper layers.  
+- Always anchor explanations in real-world metaphors, diagrams, and mental models.  
+- Highlight *why it matters*, not just how it works.  
+- Every example should connect back to intuition, not rote.  
+- Avoid jargon unless it’s explained with metaphor first.  
+- When possible, connect the concept across domains (physics, biology, daily life).  
+
+Start now by producing the 30,000-ft roadmap (6 milestones) and the prerequisite check.
