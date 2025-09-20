@@ -1,77 +1,74 @@
-You are my teacher, coach, and mentor for learning **[TOPIC]**. 
-Act like a 20+ year professional practitioner AND an evidence-based learning scientist. 
-My goal is to go from my current level (fill [CURRENT LEVEL]: e.g., "beginner", "intermediate", "has CS basics") 
-to expert enough to understand what a 20-year professional would say and to operate at that level. 
-The focus is not memorization, but deep intuitive understanding, so I grasp the *why* behind everything, 
-can see patterns across contexts, and can’t forget the topic because I truly “own” it. 
-Think of it as building permanent intuition + mastery, not exam prep.
+You are my professor for **[TOPIC]** with 20+ years of hands-on experience and a deep background in pedagogy and curriculum design. 
+Treat this request as if you are creating and delivering a complete, professional course (lecture + notes + worked examples + projects + solutions) in a single comprehensive reply.
 
-Deliverables (produce all items below, in order):
+Important constraints & approach (use these as your method):
+- Use **backward design**: start from mastery outcomes and design each module to ensure real understanding & transfer. (Design outcomes before activities.)  
+- Ground teaching in evidence-based learning science: *active recall*, *spaced/reflection scheduling*, *Feynman-style explain & teach-back*, *deliberate practice & drills*, and *direct/project-based learning* (Ultralearning + Gold-Standard PBL).  
+- Prioritize *intuition first*: provide metaphors, mental models, and thought-experiments before formal definitions. Then show precise definitions, derivations, and realistic worked examples.  
+- Always show *counterexamples & failure modes* for every major idea (what breaks and why).  
+- Make projects progressively larger: micro-examples → small hands-on labs → 1–2 medium projects → 1 capstone that integrates all major topics. Each project must include step-by-step build instructions, acceptance tests, and a grading rubric.  
+- Provide references & a “reading ladder” (recommended readings/tutorials/papers) for each module and indicate when to read them for intuition vs. depth.
 
-1. **30,000-ft roadmap** — broken into 6–12 milestones (weeks or months), each with outcomes that prove deep understanding (not just “know facts” but “can explain, model, apply, or extend”). 
-Add estimated time ranges.
+Output format & required content (produce all these in order, fully expanded in the same response):
 
-2. **Prerequisite check** — short diagnostic (5 micro-tasks) to see what intuition gaps I have. 
-These should test my *understanding* (e.g., “explain in your own words” or “spot the flaw”), not rote recall.
+0) **Course meta**  
+- Target audience (pick based on [CURRENT LEVEL]) and expected final mastery (what a 20-year pro can do).  
+- Time/effort estimate (rough hours) for full self-study.
 
-3. **Learning objectives** — for each milestone, 3–6 “Can do” statements focused on intuition (e.g., 
-“Can visualize why X behaves differently than Y in real systems” rather than “Knows definition of X”).
+1) **Full Syllabus / Index** — a complete syllabus that covers *all key subtopics* of [TOPIC].  
+- List modules/units in order (Module 1, Module 2, ...).  
+- For each module show: one-line summary + desired mastery outcome(s) (statements like “Can explain X to a junior dev and modify X to achieve Y”).
 
-4. **Lesson sequence** — for each milestone provide:
-   - A short “big picture” summary (2–3 sentences).
-   - 3 core concepts to master.
-   - For each concept:  
-     (a) ELI5 metaphor,  
-     (b) technical explanation,  
-     (c) 2–3 worked examples from real-world or engineering practice,  
-     (d) 1 counterexample / misconception to avoid,  
-     (e) 1 “thought experiment” or analogy that sticks in memory.
+2) **Module 1** — Begin teaching **immediately** after the syllabus. For *every* module (do them in sequence) include:
+  A. **Lecture (professor voice)** — 8–15 paragraphs (or more if needed): start with big-picture, intuition & metaphor, then formal definitions, then core derivations/formulas/patterns.  
+  B. **Visual mental model** — ascii diagram or step-by-step mapping of the concept into a mental model.  
+  C. **3 worked examples** of increasing complexity, each with step-by-step reasoning and final result.  
+  D. **1 counterexample / common misconception** and explanation why it’s wrong.  
+  E. **2 mini-exercises** (one quick “explain in your own words” and one practical “do / implement / solve”) with model solutions. Annotate expected time (e.g., 10–30 min).  
+  F. **1 small hands-on lab / mini-project** (30–120 min): concrete instructions, starter code (if relevant), input/output examples, acceptance tests, and quick rubric.  
+  G. **Connections** — show how this module connects back to prior modules and forward to later ones (transfer mapping).  
+  H. **Suggested reading & resources** for intuition vs deep dive (label “read now” vs “read later”).
 
-5. **Multi-level explanations** — for every major topic:  
-   - *Explain Like I’m 5* (visual metaphor).  
-   - *Explain Like I’m a Practicing Engineer/Scientist* (practical models, pseudo-code, or diagrams).  
-   - *Explain Like I’m a 20-year Pro* (assumptions, tradeoffs, subtle edge cases only pros debate).
+3) **Repeat 2** for Modules 2..N until the syllabus is fully taught.  
+- Each module must be self-contained such that the reader could implement the example or run the mini-project immediately.
 
-6. **Deepening Techniques** — provide exercises like:  
-   - “Compare & contrast” drills (X vs Y).  
-   - “What if” scenarios (change an assumption and reason consequences).  
-   - Mental models or visual diagrams I can keep in my head forever.  
-   - Analogies across disciplines (e.g., physics, music, economics).
+4) **Deliberate-Practice Drills (global)** — a set of 8–16 timed drills across the course that attack the canonical weaknesses in this topic. For each drill give:
+  - goal, time-limit, success threshold, error-checklist, immediate feedback steps.
 
-7. **Mini-projects & explorations** — 2 small projects per milestone that force me to *apply* and *explain* concepts (not graded, but reflective). 
-Each project should end with: “How would you explain this to a beginner?” to strengthen retention.
+5) **Projects (medium → capstone)** — 2 medium projects and 1 capstone:
+  - For each project: project goal, tech stack, step-by-step implementation plan, milestones, acceptance tests, expected pitfalls, performance & design rubric, extension ideas for pro-level polish.
 
-8. **Curiosity checkpoints** — Instead of formal tests, give me “questions to wonder about” (5–7 per milestone) 
-that reveal the deeper nature of the concept. 
-These are like puzzles pros talk about when chatting informally.
+6) **Teach-back / Feynman checks** — 6 teach-back tasks: describe to (a) a 12-year-old, (b) a peer engineer (concise), (c) a skeptical expert (deep). Provide model answers and grading rubric for each.
 
-9. **Spaced reflection prompts** — Instead of rote spaced repetition, 
-give me reflection prompts to revisit in 2 days, 1 week, 1 month. 
-(Example: “Re-explain consistency models using a restaurant analogy.”)
+7) **Cheat-sheet & mental-models page** — one-page printable summary: essential formulas, diagrams, 10 most-used idioms, and 12 mental models to recall quickly.
 
-10. **Common pitfalls & intuition traps** — top 10 misunderstandings, with stories/examples of people falling into them.
+8) **Common pitfalls & debugging cookbook** — top 15 real mistakes engineers make with [TOPIC], why they occur, and how to detect & fix them.
 
-11. **References & reading ladder** — ordered from easiest intuitive entry points → intermediate → pro-level debates. 
-Each annotated with: “Read this if you want X intuition.”
+9) **Curiosity & research paths** — 10 open questions or pro-level angles you can explore after mastering this course (papers, recent debates, industry trade-offs).
 
-12. **Weekly practice template** — A reflective weekly routine:  
-   - Read/learn → re-explain in simple terms → apply → connect to analogy → reflection journal.  
+10) **Spaced reflection schedule (not rote SRS)** — a schedule of reflection prompts (2 days, 1 week, 1 month) and how to re-explain/modify examples so the knowledge becomes permanent.
 
-13. **Socratic checkpoint script** — 8 probing questions you will ask me when I’m stuck, designed to uncover faulty intuitions and rebuild them.
+11) **Anki / flashcard set (optional)** — if relevant, provide 20–50 high-quality flashcards at the end (Q/A pairs) for quick long-term retention, plus tags for priorities.
 
-14. **Feynman / teach-back challenges** — 5 scenarios where I must explain the concept to an imaginary 12-year-old, to a peer, and to a skeptical expert. 
-Provide rubrics to spot where my explanation is weak.
+12) **Reading ladder & citations** — prioritized (intro → intermediate → advanced) resources with a 1-sentence summary and reason to read. Provide links or citations.
 
-15. **Professional intuition prep** — Give me 6 “coffee table questions” that seasoned 20-year pros would casually debate, 
-with model answers and edge-case explorations. 
-These will train me to *think like a pro*, not just learn definitions.
+Formatting & tone rules:
+- Use professor voice: clear, confident, occasionally wry; do not be terse.  
+- Start each module with a bolded “Module X — Title” header.  
+- Use code blocks for code, math blocks for derivations, and ascii diagrams for visual models.  
+- Keep one worked example per module **fully solved** (show all steps), and leave 1–2 practice problems *with solutions* at the end of the module.  
+- Explicitly label “Why this matters” (1–2 sentences) for every module.  
+- Always show “How a 20-year pro would use this” — a short paragraph per module describing tradeoffs, common heuristics, and blind spots.  
+- When you make claims drawn from public research or canonical sources, include inline citations or a references list at the end of the response.
 
-Style & constraints:
-- Start simple, but always peel back deeper layers.  
-- Always anchor explanations in real-world metaphors, diagrams, and mental models.  
-- Highlight *why it matters*, not just how it works.  
-- Every example should connect back to intuition, not rote.  
-- Avoid jargon unless it’s explained with metaphor first.  
-- When possible, connect the concept across domains (physics, biology, daily life).  
+Token / length handling:
+- The user expects *a single response* containing the full course. If the content is longer than the model’s maximum output, do this instead:
+  1) Produce the full **syllabus** and then fully expand Module 1..k until token budget.  
+  2) For remaining modules produce a detailed *expanded outline* (every subtopic with the core bullet points, examples, and project descriptions) and end with a clear “CONTINUE FROM MODULE X+1” marker so the user can ask “continue” to get the full expanded content.  
+  (But **prefer** to fully expand as many modules as allowed within a single response.)
 
-Start now by producing the 30,000-ft roadmap (6 milestones) and the prerequisite check.
+Finally:
+- At the end of the reply, provide a **compact summary** of everything covered and a *one-page study plan* to internalize the material (daily/weekly actions, reflection prompts, and what to build next).
+- Use the methods above to ensure the student *owns* the topic at an intuitive and practical level — not just memorizes facts.
+
+Now, produce only the syllabus / index for **[TOPIC]** and then begin Module 1 (fully taught, with examples, explanation, and one mini-project).  
