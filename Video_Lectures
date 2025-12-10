@@ -74,6 +74,30 @@ Sharp, high-quality, non-generic
 Designed to stretch understanding
 The kind of questions that turn passive learning into active mastery
 
+8. Code Extraction, Explanation & Syntax Reference: 
+If the video includes any code, demonstrations, or implementation examples, produce:
+A. Full Code Reconstruction from the Lecture
+Recreate every code snippet used in the video
+Correct mistakes the instructor made
+Explain each line with purpose, logic, and intuition
+Highlight best practices vs. suboptimal approaches
+Point out hidden assumptions or missing error handling
+
+B. Syntax Cheat Sheet (If Applicable)
+For any concept involving code (e.g., NLP preprocessing, TF-IDF, regex, ML models, data structures, algorithms), produce:
+Minimal working examples
+Idiomatic syntax
+Common patterns
+Anti-patterns
+Example inputs and outputs
+Pitfalls newcomers miss
+
+C. Alternative Code Versions (Only If the Original Is Incomplete)
+Provide variations (fast, clean, interview-friendly, production-ready)
+Show trade-offs between approaches
+Add comments where conceptual understanding is strengthened
+Focus: Make me understand the implementation deeply enough to recreate it from memory.
+
 Tone & Requirements
 **No fluff. No rephrasing of the transcript.
 No paragraph-by-paragraph summarizing.**
