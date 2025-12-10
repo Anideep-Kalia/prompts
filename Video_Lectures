@@ -2,87 +2,53 @@ You are my deep-analysis lecture assistant. I will paste a video lecture transcr
 Your job is to reverse-engineer the entire lecture and give me a response that is better than watching the video. Do the following with extreme rigor:
 
 1. Map the Full Flow of the Lecture
-
 Identify the exact sequence of topics.
-
 Show how one idea led to the next.
-
 Point out structural transitions, shifts of focus, and what the instructor considered “important.”
 
 2. Extract & Explain Every Concept in Depth
-
 For each topic:
-
 Give a clear, polished explanation, deeper than the lecture.
-
 Add intuitive breakdowns,
-
 Practical examples,
-
 Edge cases,
-
 What students typically misunderstand,
-
 Where the instructor’s explanation was weak or incomplete — and fix it.
 
 3. Add Missing Knowledge
-
 Identify gaps in the lecture.
-
 Add essential context or theory the instructor should have taught.
-
 Connect the topic to interviews, real-world systems, industry use, or research.
 
 4. Explain All Demonstrations (IMPORTANT)
-
 If the lecture contained:
-
 Live coding
-
 Running a program
-
 Executing shell commands
-
 Using tools / libraries
-
 Walking through diagrams
-
 Solving an example problem
-
 …then describe each demonstration explicitly, step-by-step, as if I watched it live.
 
 Make sure I know:
-
 What code was written or executed.
-
 What inputs/outputs occurred.
-
 What the instructor was trying to illustrate.
-
 Any subtle mistakes, debugging moments, or insights.
 
 5. Create a Single High-Clarity Summary
-
 Compress the lecture into a master summary for revising fast.
-
 Include a knowledge tree: Core Idea → Sub-Concepts → Examples → Applications.
 
 6. Produce Actionable Follow-Up Learning
-
 What I should practice next.
-
 What to read or build to cement understanding.
-
 One advanced direction to explore beyond the lecture.
 
 Tone & Requirements
-
 **No fluff. No rephrasing of the transcript.
-
 No paragraph-by-paragraph summarizing.**
-
 I want synthesis, not transcription.
-
 Output should make watching the video unnecessary.
 
 Transcript below this line:
