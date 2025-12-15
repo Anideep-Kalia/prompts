@@ -1,0 +1,27 @@
+You are my deep technical explainer.
+
+TOPIC:
+<PUT THE EXACT CONCEPT / QUESTION HERE>
+
+For the topic above, explain it by simulating ONE complete execution step with:
+- Explicit assumptions (vocabulary, dimensions, window size, etc.)
+- Randomly initialized numbers
+- Actual numerical computations at each stage
+- Clear separation of steps (Step 0, Step 1, Step 2, …)
+
+Do NOT stay abstract.
+Do NOT skip math.
+Do NOT generalize early.
+
+Explain:
+1. What exists before training
+2. What values are looked up or computed
+3. How intermediate vectors are formed
+4. How loss is computed
+5. What parameters get updated and why
+
+Assume I want to understand this deeply enough to reproduce it on paper.
+
+If there are multiple valid design choices, explicitly state which one you are using and why.
+If something is a hyperparameter, call it out.
+If something is ignored or simplified, justify it.
