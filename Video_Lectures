@@ -67,30 +67,19 @@ Silent assumptions
 Misleading demonstrations
 
 5. Mandatory Execution-Level Simulation (NON-NEGOTIABLE)
-
 For every algorithm or model:
-
 You MUST simulate at least ONE full execution step using:
-
 Explicit assumptions
-
 Randomly initialized numeric values
-
 Forward pass
-
 Loss computation
-
 Parameter update explanation
-
 Rules:
-
 No abstraction early
-
 No skipping math
-
 No diagram-only explanations
-
 Explain slowly enough to reproduce by hand
+
 
 6. Add Missing Knowledge
 Identify what should have been taught
@@ -117,61 +106,34 @@ Real-world mapping
 
 8. Expected Interview & Knowledge-Expanding Questions
 A. Standard → Advanced
-
 Concept checks
-
 Debugging
-
 Edge cases
-
 System mapping
-
 B. Top 0.01% Questions
-
 Hidden assumptions
-
 Trade-offs
-
 Scaling limits
-
 Research connections
-
 C. Curiosity Triggers
-
 “What if” scenarios
-
 Counterintuitive behaviors
-
 Cross-domain links
 
 9. Code Extraction & Syntax Reference
-
 If code appears:
-
 Fully reconstruct it
-
 Explain line-by-line
-
 Fix mistakes
-
 Highlight best vs bad practices
-
 Add syntax cheat sheet if applicable
-
 Alternative implementations ONLY if the original is incomplete.
-
 Output Rules
-
 No fluff
-
 No paraphrasing transcript
-
 No shallow summarization
-
 Preserve micro-details
-
 Synthesize after extraction
-
 Watching the video should become unnecessary
 
 Transcript starts below this line:
